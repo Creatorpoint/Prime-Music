@@ -3,169 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prime Music Legal</title>
+<title>Prime Hindi Music Hybrid</title>
 <style>
-:root{
-  --bg:#0f0f0f; --card:#1f1f1f; --text:#fff; --primary:#0088cc; --secondary:#00c3ff;
-}
-body{margin:0;font-family:'Roboto',sans-serif;background:var(--bg);color:var(--text);transition:.3s;}
+:root{--bg:#0f0f0f;--card:#1f1f1f;--text:#fff;--primary:#00c3ff;}
+body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--text);transition:.3s;}
 body.light{--bg:#f2f2f2;--card:#fff;--text:#000;}
-header{background:#111;padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;}
-header h2{margin:0;font-size:22px;font-weight:700;color:var(--primary);}
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-.controls input{padding:8px 10px;border-radius:6px;border:none;outline:none;width:180px;}
-.controls button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:500;font-size:13px;transition:.3s;}
-button.glow{background:var(--primary);color:#fff;box-shadow:0 0 8px var(--secondary);}
-#loginSection{height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:12px;padding:10px;}
-#loginSection h2{font-size:28px;color:var(--primary);}
-#loginSection input, #loginSection button{width:260px;padding:10px;border-radius:8px;border:none;outline:none;font-size:14px;}
-#loginSection button{background:var(--primary);color:#fff;font-weight:500;}
-#songList{display:flex;flex-wrap:wrap;gap:12px;padding:10px;}
-.songCard{background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:1 1 150px;text-align:center;transition:.3s;}
-.songCard:hover{transform:scale(1.05);}
-audio{width:100%;margin-top:10px;border-radius:6px;}
-#roomSection{margin:10px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+header{padding:12px 20px;background:#111;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;}
+header h2{color:var(--primary);margin:0;}
+.controls{display:flex;flex-wrap:wrap;gap:8px;}
+.controls input{padding:6px 10px;border-radius:6px;border:none;outline:none;width:180px;}
+.controls button{padding:6px 10px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
+button.glow{background:var(--primary);color:#000;}
+#loginSection{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;}
+#loginSection input, #loginSection button{width:260px;padding:10px;border-radius:6px;border:none;}
+#loginSection button{background:var(--primary);}
+#videos,#mp3List{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;padding:12px;}
+.video-card,.mp3-card{background:var(--card);padding:6px;border-radius:6px;cursor:pointer;text-align:center;transition:.3s;}
+.video-card:hover,.mp3-card:hover{transform:scale(1.05);}
+.video-card img,.mp3-card img{width:100%;border-radius:6px;}
+#videoModal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;justify-content:center;align-items:center;z-index:1000;}
+#videoModal iframe{width:90%;height:60%;}
+#roomSection{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center;}
 #roomIdDisplay{background:var(--card);padding:6px 10px;border-radius:6px;user-select:text;}
 .copyBtn{background:#00c3ff;color:#000;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:bold;}
+audio{width:100%;margin-top:6px;border-radius:6px;}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="loginSection">
-  <h2>Prime Music Login</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="signupBtn">Sign Up</button>
-  <button id="loginBtn">Login</button>
+<h2>Prime Hindi Music Hybrid</h2>
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<button id="signupBtn">Sign Up</button>
+<button id="loginBtn">Login</button>
 </div>
 
 <!-- MAIN -->
 <div id="mainContent" style="display:none;">
-  <header>
-    <h2>Prime Music Legal</h2>
-    <div class="controls">
-      <input type="text" id="searchInput" placeholder="Search songs...">
-      <button id="searchBtn" class="glow">Search</button>
-      <button onclick="document.body.classList.toggle('light')">Light/Dark</button>
-      <button id="logoutBtn">Logout</button>
-    </div>
-  </header>
+<header>
+<h2>Prime Hindi Music Hybrid</h2>
+<div class="controls">
+<input type="text" id="searchInput" placeholder="Search songs...">
+<button id="searchBtn" class="glow">Search</button>
+<button onclick="document.body.classList.toggle('light')">Light/Dark</button>
+<button id="logoutBtn">Logout</button>
+</div>
+</header>
 
-  <!-- Room Section -->
-  <div id="roomSection">
-    <button id="createRoomBtn" class="glow">Create Room</button>
-    <input type="text" id="joinRoomId" placeholder="Room ID">
-    <button id="joinRoomBtn">Join Room</button>
-    <span id="roomIdDisplay"></span>
-    <button class="copyBtn" id="copyRoomBtn">Copy Room ID</button>
-  </div>
+<div id="roomSection">
+<button id="createRoomBtn" class="glow">Create Room</button>
+<input type="text" id="joinRoomId" placeholder="Room ID">
+<button id="joinRoomBtn">Join Room</button>
+<span id="roomIdDisplay"></span>
+<button class="copyBtn" id="copyRoomBtn">Copy Room ID</button>
+</div>
 
-  <h3>Available Songs</h3>
-  <div id="songList"></div>
+<h3>YouTube Trending / Bollywood Songs</h3>
+<div id="videos"></div>
 
-  <audio id="player" controls></audio>
+<h3>Legal MP3 Hindi / Regional Songs</h3>
+<div id="mp3List"></div>
+<audio id="player" controls></audio>
+
+<div id="videoModal" onclick="closeModal()">
+<iframe id="modalFrame" allowfullscreen></iframe>
 </div>
 
 <script type="module">
-// Firebase
+// Firebase Init
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyCCopKp0hV4OGII8ipuMu0qRuFWYFJWdTE",
-authDomain: "prime-music-36602.firebaseapp.com",
-projectId: "prime-music-36602",
-storageBucket: "prime-music-36602.firebasestorage.app",
-messagingSenderId: "688674559206",
-appId: "1:688674559206:web:0655bf16dae665e8a4d727",
-measurementId: "G-HZNXMNL30S"
+const firebaseConfig={
+apiKey:"AIzaSyCCopKp0hV4OGII8ipuMu0qRuFWYFJWdTE",
+authDomain:"prime-music-36602.firebaseapp.com",
+projectId:"prime-music-36602",
+storageBucket:"prime-music-36602.firebasestorage.app",
+messagingSenderId:"688674559206",
+appId:"1:688674559206:web:0655bf16dae665e8a4d727"
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Jamendo API key
-const JAMENDO_KEY = "e82cecaf"; // Free legal MP3s
+// YouTube API
+const API_KEY="AIzaSyB7XGItFXkRNsc_X6zmz8UnF5UyIkhL9cw";
 
 // Login / Signup
-signupBtn.onclick = async()=>{
-try{ await createUserWithEmailAndPassword(auth,email.value,password.value); alert("Signup successful! Login now."); } 
-catch(e){alert(e.message);}
-};
-loginBtn.onclick = async()=>{ try{await signInWithEmailAndPassword(auth,email.value,password.value);}catch(e){alert(e.message);} };
-logoutBtn.onclick = ()=>signOut(auth);
+signupBtn.onclick=async()=>{try{await createUserWithEmailAndPassword(auth,email.value,password.value); alert("Signup successful");}catch(e){alert(e.message);}};
+loginBtn.onclick=async()=>{try{await signInWithEmailAndPassword(auth,email.value,password.value);}catch(e){alert(e.message);}};
+logoutBtn.onclick=()=>signOut(auth);
 
 onAuthStateChanged(auth,user=>{
-if(user){ loginSection.style.display="none"; mainContent.style.display="block"; loadSongs("Hindi"); } 
-else{ loginSection.style.display="flex"; mainContent.style.display="none"; }
+if(user){ loginSection.style.display="none"; mainContent.style.display="block"; loadVideos("Hindi trending songs"); loadMP3List(); }
+else{ loginSection.style.display="flex"; mainContent.style.display="none";}
 });
 
-// Load / Search Songs
-async function loadSongs(query){
-if(!query) query="Hindi";
-const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_KEY}&format=jsonpretty&limit=12&search=${query}`);
-const data = await res.json();
-songList.innerHTML="";
-data.results.forEach(track=>{
+// YouTube Embed
+async function loadVideos(query){
+query=query||searchInput.value||"Hindi trending songs";
+const res=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=12&q=${encodeURIComponent(query)}&key=${API_KEY}`);
+const data=await res.json();
+videos.innerHTML="";
+data.items.forEach(item=>{
 const div=document.createElement("div");
-div.className="songCard";
-div.innerHTML=`<p>${track.name} - ${track.artist_name}</p>`;
-div.onclick=()=>createRoomWithSong(track.audio);
-songList.appendChild(div);
+div.className="video-card";
+div.innerHTML=`<img src="${item.snippet.thumbnails.medium.url}"><p>${item.snippet.title}</p>`;
+div.onclick=()=>openVideo(item.id.videoId);
+videos.appendChild(div);
 });
 }
-searchBtn.onclick=()=>loadSongs(searchInput.value);
+searchBtn.onclick=()=>loadVideos(searchInput.value);
+
+window.openVideo=(id)=>{videoModal.style.display="flex"; modalFrame.src=`https://www.youtube.com/embed/${id}?autoplay=1`;}
+window.closeModal=()=>{videoModal.style.display="none"; modalFrame.src="";}
+
+// Legal MP3 List (CC / Indie Hindi)
+let mp3Songs=[
+{name:"Indie Hindi Song 1",url:"https://files.catbox.moe/aehosb.mp3"},
+{name:"Indie Hindi Song 2",url:"https://files.catbox.moe/df2td4.mp3"},
+{name:"Indie Bhojpuri Song",url:"https://files.catbox.moe/z544v2.mp3"}
+];
+function loadMP3List(){
+mp3List.innerHTML="";
+mp3Songs.forEach(track=>{
+const div=document.createElement("div");
+div.className="mp3-card";
+div.innerHTML=`<p>${track.name}</p>`;
+div.onclick=()=>{player.src=track.url; player.play();};
+mp3List.appendChild(div);
+});
+}
 
 // Multi-user Room
 let currentRoomId="";
 createRoomBtn.onclick=()=>{
-if(songList.children[0]){
-const songUrl=songList.children[0].querySelector("p").innerText;
 currentRoomId="room"+Date.now();
-set(ref(db,"rooms/"+currentRoomId),{currentSong:songList.children[0].innerText,currentTime:0,isPlaying:true});
-startRoom(currentRoomId);
+set(ref(db,"rooms/"+currentRoomId),{currentVideo:"",mp3Song:mp3Songs[0].url,isPlaying:true});
 roomIdDisplay.innerText=currentRoomId;
-}
+joinRoom(currentRoomId);
 };
-joinRoomBtn.onclick=()=>{
-const id=joinRoomId.value.trim();
-if(id){currentRoomId=id;startRoom(id);roomIdDisplay.innerText=id;}
-};
+joinRoomBtn.onclick=()=>{const id=joinRoomId.value.trim(); if(id){currentRoomId=id; joinRoom(id); roomIdDisplay.innerText=id; }};
 copyRoomBtn.onclick=()=>{navigator.clipboard.writeText(currentRoomId); alert("Room ID copied!");};
 
-function createRoomWithSong(songUrl){
-currentRoomId="room"+Date.now();
-set(ref(db,"rooms/"+currentRoomId),{currentSong:songUrl,currentTime:0,isPlaying:true});
-startRoom(currentRoomId);
-roomIdDisplay.innerText=currentRoomId;
-}
-
-function startRoom(roomId){
-const playerEl=document.getElementById("player");
+function joinRoom(roomId){
 const roomRef=ref(db,"rooms/"+roomId);
-let localChange=false;
-
 onValue(roomRef,snap=>{
-const data=snap.val();
-if(!data) return;
-if(!localChange){
-if(playerEl.src!==data.currentSong) playerEl.src=data.currentSong;
-playerEl.currentTime=data.currentTime;
-data.isPlaying?playerEl.play():playerEl.pause();
-}
+const data=snap.val(); if(!data) return;
+if(player.src!==data.mp3Song){player.src=data.mp3Song; if(data.isPlaying) player.play();}
 });
-
-playerEl.addEventListener("play",()=>updateRoom(true));
-playerEl.addEventListener("pause",()=>updateRoom(false));
-playerEl.addEventListener("timeupdate",()=>{if(!playerEl.paused) updateRoom(true);});
-
-function updateRoom(isPlaying){
-localChange=true;
-update(roomRef,{currentSong:playerEl.src,currentTime:playerEl.currentTime,isPlaying:isPlaying});
-setTimeout(()=>{localChange=false;},300);
-}
+player.addEventListener("play",()=>updateRoom(true));
+player.addEventListener("pause",()=>updateRoom(false));
+player.addEventListener("timeupdate",()=>{if(!player.paused) updateRoom(true);});
+function updateRoom(isPlaying){update(roomRef,{mp3Song:player.src,isPlaying:isPlaying});}
 }
 </script>
 </body>
