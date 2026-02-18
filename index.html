@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prime Music Sync</title>
+<title>Prime Music Legal</title>
 <style>
 :root{
   --bg:#0f0f0f; --card:#1f1f1f; --text:#fff; --primary:#0088cc; --secondary:#00c3ff;
@@ -21,9 +21,12 @@ button.glow{background:var(--primary);color:#fff;box-shadow:0 0 8px var(--second
 #loginSection input, #loginSection button{width:260px;padding:10px;border-radius:8px;border:none;outline:none;font-size:14px;}
 #loginSection button{background:var(--primary);color:#fff;font-weight:500;}
 #songList{display:flex;flex-wrap:wrap;gap:12px;padding:10px;}
-.songCard{background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:1 1 150px;text-align:center;}
+.songCard{background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:1 1 150px;text-align:center;transition:.3s;}
 .songCard:hover{transform:scale(1.05);}
-audio{width:100%;margin-top:10px;}
+audio{width:100%;margin-top:10px;border-radius:6px;}
+#roomSection{margin:10px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+#roomIdDisplay{background:var(--card);padding:6px 10px;border-radius:6px;user-select:text;}
+.copyBtn{background:#00c3ff;color:#000;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -40,19 +43,27 @@ audio{width:100%;margin-top:10px;}
 <!-- MAIN -->
 <div id="mainContent" style="display:none;">
   <header>
-    <h2>Prime Music Sync</h2>
+    <h2>Prime Music Legal</h2>
     <div class="controls">
-      <button id="createRoomBtn" class="glow">Create Room</button>
-      <input type="text" id="joinRoomId" placeholder="Room ID">
-      <button id="joinRoomBtn">Join Room</button>
       <input type="text" id="searchInput" placeholder="Search songs...">
-      <button id="searchBtn">Search</button>
+      <button id="searchBtn" class="glow">Search</button>
       <button onclick="document.body.classList.toggle('light')">Light/Dark</button>
       <button id="logoutBtn">Logout</button>
     </div>
   </header>
+
+  <!-- Room Section -->
+  <div id="roomSection">
+    <button id="createRoomBtn" class="glow">Create Room</button>
+    <input type="text" id="joinRoomId" placeholder="Room ID">
+    <button id="joinRoomBtn">Join Room</button>
+    <span id="roomIdDisplay"></span>
+    <button class="copyBtn" id="copyRoomBtn">Copy Room ID</button>
+  </div>
+
   <h3>Available Songs</h3>
   <div id="songList"></div>
+
   <audio id="player" controls></audio>
 </div>
 
@@ -76,7 +87,7 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 // Jamendo API key
-const JAMENDO_KEY = "e82cecaf";
+const JAMENDO_KEY = "e82cecaf"; // Free legal MP3s
 
 // Login / Signup
 signupBtn.onclick = async()=>{
@@ -87,13 +98,13 @@ loginBtn.onclick = async()=>{ try{await signInWithEmailAndPassword(auth,email.va
 logoutBtn.onclick = ()=>signOut(auth);
 
 onAuthStateChanged(auth,user=>{
-if(user){ loginSection.style.display="none"; mainContent.style.display="block"; loadSongs("trending"); } 
+if(user){ loginSection.style.display="none"; mainContent.style.display="block"; loadSongs("Hindi"); } 
 else{ loginSection.style.display="flex"; mainContent.style.display="none"; }
 });
 
-// Search Songs
+// Load / Search Songs
 async function loadSongs(query){
-if(query==="trending") query="";
+if(!query) query="Hindi";
 const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_KEY}&format=jsonpretty&limit=12&search=${query}`);
 const data = await res.json();
 songList.innerHTML="";
@@ -108,13 +119,27 @@ songList.appendChild(div);
 searchBtn.onclick=()=>loadSongs(searchInput.value);
 
 // Multi-user Room
-createRoomBtn.onclick=()=>{ if(songList.children[0]) createRoomWithSong(songList.children[0].querySelector("p").innerText); };
-joinRoomBtn.onclick=()=>{ const id=joinRoomId.value.trim(); if(id) startRoom(id); };
+let currentRoomId="";
+createRoomBtn.onclick=()=>{
+if(songList.children[0]){
+const songUrl=songList.children[0].querySelector("p").innerText;
+currentRoomId="room"+Date.now();
+set(ref(db,"rooms/"+currentRoomId),{currentSong:songList.children[0].innerText,currentTime:0,isPlaying:true});
+startRoom(currentRoomId);
+roomIdDisplay.innerText=currentRoomId;
+}
+};
+joinRoomBtn.onclick=()=>{
+const id=joinRoomId.value.trim();
+if(id){currentRoomId=id;startRoom(id);roomIdDisplay.innerText=id;}
+};
+copyRoomBtn.onclick=()=>{navigator.clipboard.writeText(currentRoomId); alert("Room ID copied!");};
 
 function createRoomWithSong(songUrl){
-const roomId="room"+Date.now();
-set(ref(db,"rooms/"+roomId),{currentSong:songUrl,currentTime:0,isPlaying:true});
-startRoom(roomId);
+currentRoomId="room"+Date.now();
+set(ref(db,"rooms/"+currentRoomId),{currentSong:songUrl,currentTime:0,isPlaying:true});
+startRoom(currentRoomId);
+roomIdDisplay.innerText=currentRoomId;
 }
 
 function startRoom(roomId){
@@ -141,8 +166,6 @@ localChange=true;
 update(roomRef,{currentSong:playerEl.src,currentTime:playerEl.currentTime,isPlaying:isPlaying});
 setTimeout(()=>{localChange=false;},300);
 }
-
-alert("Room started: "+roomId);
 }
 </script>
 </body>
