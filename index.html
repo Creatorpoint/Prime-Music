@@ -1,31 +1,149 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prime Music Sync</title>
-<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --bg:#0f0f0f; --card:#1f1f1f; --text:#fff; --primary:#0088cc; --secondary:#00c3ff;
+}
+body{margin:0;font-family:'Roboto',sans-serif;background:var(--bg);color:var(--text);transition:.3s;}
+body.light{--bg:#f2f2f2;--card:#fff;--text:#000;}
+header{background:#111;padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;}
+header h2{margin:0;font-size:22px;font-weight:700;color:var(--primary);}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.controls input{padding:8px 10px;border-radius:6px;border:none;outline:none;width:180px;}
+.controls button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:500;font-size:13px;transition:.3s;}
+button.glow{background:var(--primary);color:#fff;box-shadow:0 0 8px var(--secondary);}
+#loginSection{height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:12px;padding:10px;}
+#loginSection h2{font-size:28px;color:var(--primary);}
+#loginSection input, #loginSection button{width:260px;padding:10px;border-radius:8px;border:none;outline:none;font-size:14px;}
+#loginSection button{background:var(--primary);color:#fff;font-weight:500;}
+#songList{display:flex;flex-wrap:wrap;gap:12px;padding:10px;}
+.songCard{background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:1 1 150px;text-align:center;}
+.songCard:hover{transform:scale(1.05);}
+audio{width:100%;margin-top:10px;}
+</style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginSection">
-<h2>Login / Signup</h2>
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button id="signupBtn">Sign Up</button>
-<button id="loginBtn">Login</button>
+  <h2>Prime Music Login</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button id="signupBtn">Sign Up</button>
+  <button id="loginBtn">Login</button>
 </div>
 
+<!-- MAIN -->
 <div id="mainContent" style="display:none;">
-<h2>Prime Music</h2>
-<button id="createRoomBtn">Create Room</button>
-<input type="text" id="joinRoomId" placeholder="Enter Room ID">
-<button id="joinRoomBtn">Join Room</button>
-
-<h3>Available Songs</h3>
-<div id="songList"></div>
+  <header>
+    <h2>Prime Music Sync</h2>
+    <div class="controls">
+      <button id="createRoomBtn" class="glow">Create Room</button>
+      <input type="text" id="joinRoomId" placeholder="Room ID">
+      <button id="joinRoomBtn">Join Room</button>
+      <input type="text" id="searchInput" placeholder="Search songs...">
+      <button id="searchBtn">Search</button>
+      <button onclick="document.body.classList.toggle('light')">Light/Dark</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
+  <h3>Available Songs</h3>
+  <div id="songList"></div>
+  <audio id="player" controls></audio>
 </div>
 
-<script type="module" src="js/main.js"></script>
+<script type="module">
+// Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCCopKp0hV4OGII8ipuMu0qRuFWYFJWdTE",
+authDomain: "prime-music-36602.firebaseapp.com",
+projectId: "prime-music-36602",
+storageBucket: "prime-music-36602.firebasestorage.app",
+messagingSenderId: "688674559206",
+appId: "1:688674559206:web:0655bf16dae665e8a4d727",
+measurementId: "G-HZNXMNL30S"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Jamendo API key
+const JAMENDO_KEY = "e82cecaf";
+
+// Login / Signup
+signupBtn.onclick = async()=>{
+try{ await createUserWithEmailAndPassword(auth,email.value,password.value); alert("Signup successful! Login now."); } 
+catch(e){alert(e.message);}
+};
+loginBtn.onclick = async()=>{ try{await signInWithEmailAndPassword(auth,email.value,password.value);}catch(e){alert(e.message);} };
+logoutBtn.onclick = ()=>signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+if(user){ loginSection.style.display="none"; mainContent.style.display="block"; loadSongs("trending"); } 
+else{ loginSection.style.display="flex"; mainContent.style.display="none"; }
+});
+
+// Search Songs
+async function loadSongs(query){
+if(query==="trending") query="";
+const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_KEY}&format=jsonpretty&limit=12&search=${query}`);
+const data = await res.json();
+songList.innerHTML="";
+data.results.forEach(track=>{
+const div=document.createElement("div");
+div.className="songCard";
+div.innerHTML=`<p>${track.name} - ${track.artist_name}</p>`;
+div.onclick=()=>createRoomWithSong(track.audio);
+songList.appendChild(div);
+});
+}
+searchBtn.onclick=()=>loadSongs(searchInput.value);
+
+// Multi-user Room
+createRoomBtn.onclick=()=>{ if(songList.children[0]) createRoomWithSong(songList.children[0].querySelector("p").innerText); };
+joinRoomBtn.onclick=()=>{ const id=joinRoomId.value.trim(); if(id) startRoom(id); };
+
+function createRoomWithSong(songUrl){
+const roomId="room"+Date.now();
+set(ref(db,"rooms/"+roomId),{currentSong:songUrl,currentTime:0,isPlaying:true});
+startRoom(roomId);
+}
+
+function startRoom(roomId){
+const playerEl=document.getElementById("player");
+const roomRef=ref(db,"rooms/"+roomId);
+let localChange=false;
+
+onValue(roomRef,snap=>{
+const data=snap.val();
+if(!data) return;
+if(!localChange){
+if(playerEl.src!==data.currentSong) playerEl.src=data.currentSong;
+playerEl.currentTime=data.currentTime;
+data.isPlaying?playerEl.play():playerEl.pause();
+}
+});
+
+playerEl.addEventListener("play",()=>updateRoom(true));
+playerEl.addEventListener("pause",()=>updateRoom(false));
+playerEl.addEventListener("timeupdate",()=>{if(!playerEl.paused) updateRoom(true);});
+
+function updateRoom(isPlaying){
+localChange=true;
+update(roomRef,{currentSong:playerEl.src,currentTime:playerEl.currentTime,isPlaying:isPlaying});
+setTimeout(()=>{localChange=false;},300);
+}
+
+alert("Room started: "+roomId);
+}
+</script>
 </body>
 </html>
